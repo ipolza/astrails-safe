@@ -54,7 +54,7 @@ module Astrails
 
         cleanup_with_limit(files, keep) do |f|
           puts "removing s3 file #{bucket_name}:#{f}" if dry_run? || verbose?
-          @connection.buckets[bucket].objects[f].delete unless dry_run? || local_only?
+          @connection.buckets[bucket_name].objects[f].delete unless dry_run? || local_only?
         end
       end
 
