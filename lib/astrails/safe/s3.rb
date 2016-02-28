@@ -5,7 +5,7 @@ module Astrails
 
       def initialize(config, backup)
         super(config, backup)
-        @connection = AWS::S3.new(:access_key_id => key, :secret_access_key => secret) unless local_only?
+        @connection = AWS::S3.new(:access_key_id => key, :secret_access_key => secret, :region => region) unless local_only?
       end
 
       protected
@@ -29,7 +29,9 @@ module Astrails
             return
           end
           benchmark = Benchmark.realtime do
-            bucket = @connection.buckets.create(bucket_name) #unless bucket_exists?(bucket_name)
+            bucket = @connection.buckets[bucket_name]
+            bucket = @connection.buckets.create(bucket_name) unless bucket
+
             File.open(@backup.path) do |file|
               bucket.objects.create(full_path, file)
             end
@@ -56,6 +58,10 @@ module Astrails
           puts "removing s3 file #{bucket_name}:#{f}" if dry_run? || verbose?
           @connection.buckets[bucket_name].objects[f].delete unless dry_run? || local_only?
         end
+      end
+
+      def region
+        config[:s3, :region]
       end
 
       def bucket_name
